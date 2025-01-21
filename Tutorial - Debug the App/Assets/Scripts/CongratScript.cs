@@ -7,9 +7,9 @@ public class CongratScript : MonoBehaviour
     public TextMesh Text;
     public ParticleSystem SparksParticles;
 
-    private List<string> TextToDisplay;
+    // initialised the list
+    private readonly List<string> TextToDisplay = new();
 
-    private float RotatingSpeed;
     private float TimeToNextText;
 
     private int CurrentText;
@@ -20,15 +20,10 @@ public class CongratScript : MonoBehaviour
         TimeToNextText = 1.0f;
         CurrentText = 0;
 
-        RotatingSpeed = 1.0f;
-
-        TextToDisplay.Add("Congratulation");
+        TextToDisplay.Add("Congratulations");
         TextToDisplay.Add("All Errors Fixed");
 
-        foreach (string sentence in TextToDisplay)
-            Debug.Log(sentence);
-
-        Text.text = TextToDisplay[0];
+        Text.text = TextToDisplay[CurrentText];
 
         SparksParticles.Play();
     }
@@ -40,16 +35,17 @@ public class CongratScript : MonoBehaviour
 
         if (TimeToNextText > 1.5f)
         {
-            TimeToNextText = 0.0f;
-
-            CurrentText++;
-            if (CurrentText >= TextToDisplay.Count)
+            if (CurrentText > TextToDisplay.Count - 1)
             {
                 CurrentText = 0;
-
-
-                Text.text = TextToDisplay[CurrentText];
             }
+            if (TimeToNextText > 1.5f)
+            {
+                TimeToNextText = 0.0f;
+            }
+
+            Text.text = TextToDisplay[CurrentText];
+            CurrentText++;
         }
     }
 }
