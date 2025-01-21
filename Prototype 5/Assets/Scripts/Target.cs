@@ -3,6 +3,11 @@ using UnityEngine;
 public class Target : MonoBehaviour
 {
     private Rigidbody targetRb;
+    private GameManager gameManager;
+
+    public int pointValue;
+
+    public ParticleSystem explosionParticle;
 
     private float minSpeed = 12;
     private float maxSpeed = 16;
@@ -16,7 +21,7 @@ public class Target : MonoBehaviour
         transform.position = RandomSpawnPos();
         targetRb.AddForce(RandomForce(), ForceMode.Impulse);
         targetRb.AddTorque(RandomTorque(), RandomTorque(), RandomTorque(), ForceMode.Impulse);
-        
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     Vector3 RandomForce()
@@ -36,11 +41,18 @@ public class Target : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Destroy(gameObject);
+        if (gameManager.isGameActive)
+        {
+            Destroy(gameObject);
+            gameManager.UpdateScore(pointValue);
+            Instantiate(explosionParticle, transform.position, explosionParticle.transform.rotation);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
         Destroy(gameObject);
+        if (!gameObject.CompareTag("Bad"))
+            gameManager.GameOver();
     }
 }
