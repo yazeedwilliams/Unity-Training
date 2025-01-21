@@ -39,13 +39,9 @@ public class CongratScript : MonoBehaviour
             {
                 CurrentText = 0;
             }
-            if (TimeToNextText > 1.5f)
-            {
-                TimeToNextText = 0.0f;
-            }
-
             Text.text = TextToDisplay[CurrentText];
             CurrentText++;
+            TimeToNextText = 0.0f;
         }
     }
 }
