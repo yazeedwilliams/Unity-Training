@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -17,15 +16,26 @@ public class MainManager : MonoBehaviour
     
     private bool m_Started = false;
     private int m_Points = 0;
-    private int highScore = 0;
+    [HideInInspector] public int highScore;
     
     private bool m_GameOver = false;
+
+    [Serializable]
+    private class SaveData
+    {
+        public string name;
+        public int score;
+    }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        highScoreText.text = $"Best Score : {HighScoreManager.Instance.userName} : {highScore}";
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+            LoadUserData();
+        else
+            highScoreText.text = $"Best Score : {highScore}";
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -49,7 +59,7 @@ public class MainManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 m_Started = true;
-                float randomDirection = Random.Range(-1.0f, 1.0f);
+                float randomDirection = UnityEngine.Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
 
@@ -74,7 +84,45 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData savedUserData = JsonUtility.FromJson<SaveData>(json);
+            highScore = savedUserData.score;
+            if (m_Points > highScore)
+            {
+                SaveUserData();
+                LoadUserData();
+            }
+        }
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    public void SaveUserData()
+    {
+        SaveData userData = new()
+        {
+            name = HighScoreManager.Instance.name,
+            score = m_Points
+        };
+
+        string json = JsonUtility.ToJson(userData, true);
+
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    public void LoadUserData()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        string json = File.ReadAllText(path);
+        SaveData savedUserData =  JsonUtility.FromJson<SaveData>(json);
+
+        HighScoreManager.Instance.name = savedUserData.name;
+        highScore = savedUserData.score;
+
+        highScoreText.text = $"Best Score : {HighScoreManager.Instance.userName} : {highScore}";
     }
 }
