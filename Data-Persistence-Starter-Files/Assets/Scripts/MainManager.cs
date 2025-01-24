@@ -20,6 +20,8 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
+    private string path;
+
     [Serializable]
     private class SaveData
     {
@@ -27,13 +29,18 @@ public class MainManager : MonoBehaviour
         public int score;
     }
 
+    private void Awake()
+    {
+        path = Application.persistentDataPath + "/savefile.json";
+        Debug.Log(path);
+    }
+
 
     // Start is called before the first frame update
     void Start()
     {
-        string path = Application.persistentDataPath + "/savefile.json";
         if (File.Exists(path))
-            LoadUserData();
+            LoadUserData(path);
         else
             highScoreText.text = $"Best Score : {highScore}";
         const float step = 0.6f;
@@ -84,45 +91,36 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
-
-        string path = Application.persistentDataPath + "/savefile.json";
-        if (File.Exists(path))
+        if (m_Points > highScore)
         {
-            string json = File.ReadAllText(path);
-            SaveData savedUserData = JsonUtility.FromJson<SaveData>(json);
-            highScore = savedUserData.score;
-            if (m_Points > highScore)
-            {
-                SaveUserData();
-                LoadUserData();
-            }
+            SaveUserData(path);
         }
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
 
-    public void SaveUserData()
+    public void SaveUserData(string filePath)
     {
         SaveData userData = new()
         {
-            name = HighScoreManager.Instance.name,
+            name = HighScoreManager.Instance.userName,
             score = m_Points
         };
 
         string json = JsonUtility.ToJson(userData, true);
 
-        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+        File.WriteAllText(filePath, json);
     }
 
-    public void LoadUserData()
+    public void LoadUserData(string filePath)
     {
-        string path = Application.persistentDataPath + "/savefile.json";
-        string json = File.ReadAllText(path);
+        string json = File.ReadAllText(filePath);
         SaveData savedUserData =  JsonUtility.FromJson<SaveData>(json);
 
-        HighScoreManager.Instance.name = savedUserData.name;
+        name = HighScoreManager.Instance.userName;
+        name = savedUserData.name;
         highScore = savedUserData.score;
 
-        highScoreText.text = $"Best Score : {HighScoreManager.Instance.userName} : {highScore}";
+        highScoreText.text = $"Best Score : {name} : {highScore}";
     }
 }

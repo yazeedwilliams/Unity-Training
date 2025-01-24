@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class HighScoreManager : MonoBehaviour
 {
@@ -25,5 +26,11 @@ public class HighScoreManager : MonoBehaviour
     public void GetUserName()
     {
         userName = inputField.text;
+    }
+
+    public void StartGame()
+    {
+        GetUserName();
+        SceneManager.LoadScene(1);
     }
 }
